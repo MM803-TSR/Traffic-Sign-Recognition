@@ -26,3 +26,4 @@ loose_mask = mask0 + mask1
 plt.imshow(loose_mask, cmap='gray')
 plt.show()
 
+# TODO strict segmentation
