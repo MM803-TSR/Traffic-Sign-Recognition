@@ -33,11 +33,15 @@ _,contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)
 sorted_contour = sorted(contours, key=cv2.contourArea)[-1:]
 
 size = sample_img.shape
-m = np.zeros(size, dtype=np.uint8)
+m = np.zeros(size, dtype=np.uint8) 
+#Uncomment next line to show contour on the original image ----> 
+#m = sample_img
+
 for i, cnt in enumerate(sorted_contour):
     color = (0,255,0)
     cv2.drawContours(m, cnt, -1, color, thickness=5)
-
+    
+#Save the output image for a larger view
 #cv2.imwrite("contours.jpg", m);
 
 # Display result
