@@ -27,3 +27,18 @@ plt.imshow(loose_mask, cmap='gray')
 plt.show()
 
 # TODO strict segmentation
+ret,thresh = cv2.threshold(loose_mask,200,255,0)
+_,contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)
+
+size = sample_img.shape
+m = np.zeros(size, dtype=np.uint8)
+for i, cnt in enumerate(contours):
+    if cv2.contourArea(cnt) >= 5000:
+        color = (0,255,0)
+        cv2.drawContours(m, cnt, -1, color, thickness=5)
+
+#cv2.imwrite("contours.jpg", m);
+
+# Display result
+plt.imshow(m)
+plt.show()
