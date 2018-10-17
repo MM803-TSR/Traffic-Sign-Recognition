@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Read stop1.jpg as sample_img and display
-sample_img = cv2.imread('images/stop1.jpg')
+sample_img = cv2.imread('Real_Images/stop1.jpg')
 sample_img = cv2.cvtColor(sample_img, cv2.COLOR_BGR2RGB)
 plt.imshow(sample_img)
 plt.show()
@@ -27,10 +27,16 @@ plt.imshow(loose_mask, cmap='gray')
 plt.show()
 
 # TODO strict segmentation
-ret,thresh = cv2.threshold(loose_mask,125,255,0)
-_,contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)
 
-sorted_contour = sorted(contours, key=cv2.contourArea)[-1:]
+# ret,thresh = cv2.threshold(loose_mask,125,255,0)
+# above line not necessary, loose_mask is already binary
+# to be deleted in next commit
+
+# Drawing contour on loose_mask output
+_, contours, _ = cv2.findContours(loose_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+
+
+sorted_contour = sorted(contours, key=cv2.contourArea)[-1:] # let's discuss
 
 size = sample_img.shape
 m = np.zeros(size, dtype=np.uint8) 
