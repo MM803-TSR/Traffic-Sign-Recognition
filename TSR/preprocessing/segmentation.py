@@ -3,36 +3,47 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Read stop1.jpg as sample_img and display
-sample_img = cv2.imread('Real_Images/stop1.jpg')
-sample_img = cv2.cvtColor(sample_img, cv2.COLOR_BGR2RGB)
-plt.imshow(sample_img)
-plt.show()
+img_loc = 'Real_Images/stop1.jpg'
+sample_img = cv2.imread(img_loc)
 
-# Convert to HSV
-hsv_img = cv2.cvtColor(sample_img, cv2.COLOR_RGB2HSV)
+# Convert to RGB color space
+orig_img = cv2.cvtColor(sample_img, cv2.COLOR_BGR2RGB)
+plt.imshow(orig_img)
+plt.show()
+# Convert to HSV color space
+hsv_img = cv2.cvtColor(sample_img, cv2.COLOR_BGR2HSV)
+
+# Blur image to reduce unrelated noise
+blur_img = cv2.bilateralFilter(hsv_img,9,75,75)
+plt.imshow(blur_img)
+plt.show()
 
 # Get 2 different shades of red and obtain mask to detect any reds in-between
-lower_red = (0, 50, 50)
+lower_red = (0, 70, 0)
 upper_red = (10, 255, 255)
-mask0 = cv2.inRange(hsv_img, lower_red, upper_red)
-
-lower_red = (170, 50, 50)
+masked_img1 = cv2.inRange(blur_img, lower_red, upper_red)
+lower_red = (165, 70, 0)
 upper_red = (180, 255, 255)
-mask1 = cv2.inRange(hsv_img, lower_red, upper_red)
+masked_img2 = cv2.inRange(blur_img, lower_red, upper_red)
+color_masked_img = masked_img1 + masked_img2
 
-loose_mask = mask0 + mask1
-
-# Display mask
-plt.imshow(loose_mask, cmap='gray')
+# Display the color_segmented image
+plt.imshow(color_masked_img,cmap='gray')
 plt.show()
 
-# ret,thresh = cv2.threshold(loose_mask,125,255,0)
+# Image cleaning by using dilation & erosion
+kernel = np.ones((3,3),np.uint8) 
+dila_img = cv2.dilate(color_masked_img,kernel,iterations = 1)
+eros_img = cv2.erode(dila_img,kernel,iterations = 1)
+plt.imshow(eros_img,cmap='gray')
+plt.show()
+
+ret,thresh = cv2.threshold(loose_mask,125,255,0)
 # above line not necessary, loose_mask is already binary
 # to be deleted in next commit
 
 # Draw contour on loose_mask output
-_, contours, _ = cv2.findContours(loose_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-
+_, contours, _ = cv2.findContours(color_masked_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 sorted_contour = sorted(contours, key=cv2.contourArea)[-1:] # let's discuss
 
 size = sample_img.shape
