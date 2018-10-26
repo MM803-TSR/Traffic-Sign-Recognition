@@ -114,8 +114,11 @@ region = draw_contour(dilated_mask,thickness, m)
 for r in region:
 	before_eq, after_eq = hist_roi(sample_img,r,border)
 	plt.imshow(before_eq)
+	plt.show()
 	show_hist(before_eq)
+	plt.show()
 	plt.imshow(after_eq)
+	plt.show()
 	show_hist(after_eq)
 	plt.show()
 	
