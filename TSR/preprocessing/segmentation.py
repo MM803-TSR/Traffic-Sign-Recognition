@@ -22,12 +22,12 @@ def draw_contour(img, thickness, img_to_draw):
 	_, contours, _ = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 	# contours = sorted(contours, key=cv2.contourArea)[-1:]
 	for i, cnt in enumerate(contours):
-	colour = (0, 255, 0)
-	#cv2.drawContours(img_to_draw, cnt, -1, colour, thickness=thickness)
-	x, y, w, h = cv2.boundingRect(cnt)
-	if abs(w-h) >1:
-	    cv2.rectangle(img_to_draw, (x, y), (x+w, y+h), colour, thickness=thickness )
-	    pos.append([x,y,w,h])
+		colour = (0, 255, 0)
+		#cv2.drawContours(img_to_draw, cnt, -1, colour, thickness=thickness)
+		x, y, w, h = cv2.boundingRect(cnt)
+		if abs(w-h) >1:
+		    cv2.rectangle(img_to_draw, (x, y), (x+w, y+h), colour, thickness=thickness )
+		    pos.append([x,y,w,h])
 	return pos
 
 def add_border(original_img, region):
@@ -37,9 +37,9 @@ def add_border(original_img, region):
 	crop_x = [x-border,x+w+border]
 	crop_y = [y-border, y+h+border]
 	if crop_x[0]<0 or crop_x[1]>img_w:
-	crop_x = [x,x+w]
+		crop_x = [x,x+w]
 	if crop_y[0]<0 or crop_y[1]>img_h:
-	crop_y = [y,y+h]
+		crop_y = [y,y+h]
 	crop_w = crop_x[1]-crop_x[0]
 	crop_h = crop_y[1]-crop_y[0]
 	return crop_x[0],crop_y[0],crop_w,crop_h
@@ -127,6 +127,6 @@ for r in region:
 
 # Create mask that combines loose and strict after dilation
 mask = cv2.bitwise_and(loose_mask, dilated_mask)
-target = cv2.bitwise_and(sample_img, sample_img, mask=loose_mask)
+target = cv2.bitwise_or(sample_img, sample_img, mask=mask)
 plt.imshow(target)
 plt.show()
