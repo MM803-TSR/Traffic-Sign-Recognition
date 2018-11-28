@@ -180,13 +180,26 @@ similarity_level_fix = shape_compare(largest_fix_octagon_cnt, octagon_template_c
 print(similarity_level_fix)
 
 # Check if any of the 2 values is lower than a threshold? If so, draw bounding box on this contour region.
-
-# Draw/ expand the bounding box and crop it.
-border = 5
-target_region_pos, box_on_img = draw_box(final_mask, stop_rgb_img, 3)
-for r in target_region_pos:
-    before_eq, after_eq = crop_and_hist(stop_rgb_img, r, border)
-    plt.imshow(before_eq)
+if similarity_level_fix < 0.1 or similarity_level_ori < 0.1:
+    target_region_pos, box_on_img = draw_box(final_mask, stop_rgb_img, 1)
+    print(target_region_pos)
+    plt.imshow(box_on_img)
+    plt.show()
+    # Draw/ expand the bounding box and crop it.、
+    
+    border = 5
+    for r in target_region_pos:
+        before_eq, after_eq = crop_and_hist(stop_rgb_img, r, border)
+        plt.imshow(before_eq)
+        plt.show()
+        # show_hist(before_eq)
+        # #plt.show()
+        # plt.imshow(after_eq)
+        # plt.show()
+        # show_hist(after_eq)
+        # plt.show()
+else:
+    plt.imshow(stop_rgb_img)
     plt.show()
     # show_hist(before_eq)
     # #plt.show()
