@@ -4,7 +4,7 @@ Class,Name
 3,Maximum 40
 4,Yield Sign
 5,Maximum 50
-6,RIght Curve Sign
+6,Right Curve Sign
 7,Left Curve Sign
 8,Maximum 60 ahead sign
 9,Construction ahead sign
@@ -16,3 +16,4 @@ Class,Name
 15,Maximum 50 ahead sign
 16,Maximum 60
 17,Maximum 70
+18,Guide Sign
