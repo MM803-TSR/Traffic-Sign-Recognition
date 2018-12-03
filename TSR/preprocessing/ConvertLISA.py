@@ -8,7 +8,7 @@ toolsdir = basedir + '/tools/'
 sys.path.append(toolsdir)
 sys.argv.append('80')  # 80% training data - 20% testing
 sys.argv.append(basedir + '/allAnnotations.csv')
-# import splitAnnotationFiles
+import splitAnnotationFiles
 
 sign_labels = {}
 
