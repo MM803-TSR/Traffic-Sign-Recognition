@@ -8,7 +8,7 @@ toolsdir = basedir + '/tools/'
 sys.path.append(toolsdir)
 sys.argv.append('80')  # 80% training data - 20% testing
 sys.argv.append(basedir + '/allAnnotations.csv')
-# import splitAnnotationFiles
+import splitAnnotationFiles
 
 sign_labels = {}
 
@@ -61,3 +61,37 @@ train_img, train_annot = parse_csv(basedir+'\split1.csv')
 convert(train_img, train_annot, 'Train')
 test_img, test_annot = parse_csv(basedir+'\split2.csv')
 convert(test_img, test_annot, 'Test')
+
+# --------------------------Extract for CNN-------------------------------
+
+import numpy as np
+import pickle
+
+def pickle_im(annotation, size, data_type):
+	sys.path.append(toolsdir)
+	sys.argv.append('crop')
+	sys.argv.append(annotation)
+	import extractAnnotations
+
+	images = os.listdir(basedir+'/annotations/')
+	X, y = [], []
+	for path in images:
+		im = Image.open(basedir+'/annotations/'+path)
+		out = im.resize((size, size))
+		X.append(np.asarray(out))
+
+		tag = path.split('_')[1]
+		if tag not in sign_labels:
+			continue
+		y.append(np.asarray(sign_labels[tag]))
+
+	with open(basedir+'/X_'+data_type+'.p', 'wb') as f:
+		pickle.dump(np.array(X), f)
+
+	with open(basedir+'/y_'+data_type+'.p', 'wb') as f:
+		pickle.dump(np.array(y), f)
+
+	print(images)
+
+#pickle_im(basedir+'/split1.csv', 32, 'train')
+#pickle_im(basedir+'/split2.csv', 32, 'test')
