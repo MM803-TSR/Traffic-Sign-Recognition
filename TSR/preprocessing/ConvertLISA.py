@@ -67,22 +67,22 @@ convert(test_img, test_annot, 'Test')
 import numpy as np
 import pickle
 
+
 def pickle_im(annotation, size, data_type):
 	sys.path.append(toolsdir)
 	sys.argv.append('crop')
 	sys.argv.append(annotation)
-	import extractAnnotations
+	#import extractAnnotations
 
 	images = os.listdir(basedir+'/annotations/')
 	X, y = [], []
 	for path in images:
 		im = Image.open(basedir+'/annotations/'+path)
 		out = im.resize((size, size))
-		X.append(np.asarray(out))
-
 		tag = path.split('_')[1]
 		if tag not in sign_labels:
 			continue
+		X.append(np.asarray(out))
 		y.append(np.asarray(sign_labels[tag]))
 
 	with open(basedir+'/X_'+data_type+'.p', 'wb') as f:
@@ -95,3 +95,34 @@ def pickle_im(annotation, size, data_type):
 
 #pickle_im(basedir+'/split1.csv', 32, 'train')
 #pickle_im(basedir+'/split2.csv', 32, 'test')
+
+
+# -----------------------Extract new dataset for CNN----------------------------
+traindir = 'D:\Yanxi\MMGRAD\MM803\Project/train/'
+testdir = 'D:\Yanxi\MMGRAD\MM803\Project/test/'
+basedir = 'D:\Yanxi\MMGRAD\MM803\Project/'
+
+
+def append_pickle(imdir, pkldir, data_type):
+	new_X, new_y = [], []
+	subdir = os.listdir(imdir+data_type+'/')
+	for sub in subdir:
+		s = imdir+data_type+'/'+sub+'/'
+		for im in os.listdir(s):
+			image = Image.open(s+im)
+			out = image.resize((32, 32))
+			new_X.append(np.asarray(out))
+			new_y.append(np.asarray(sub))
+
+	with open(pkldir+'X_'+data_type+'.p', 'rb') as f:
+		X = pickle.load(f)
+	with open(pkldir+'y_'+data_type+'.p', 'rb') as f:
+		y = pickle.load(f)
+
+	X_total = np.concatenate((X, np.asarray(new_X)), axis=0)
+	y_total = np.concatenate((y, np.asarray(new_y)), axis=0)
+
+	with open(pkldir+'X_'+data_type+'.p', 'wb') as f:
+		pickle.dump(X_total, f)
+	with open(pkldir+'y_'+data_type+'.p', 'wb') as f:
+		pickle.dump(y_total, f)
