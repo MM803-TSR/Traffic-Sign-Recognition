@@ -6,13 +6,21 @@ import sys
 import glob
 
 
-def paste(bg_dir, sign_dir, labels, x,y):
+def paste(bg_dir, sign_dir, labels):
     global num , _size
+    # Posible sign position
+    X = [i for i in np.arange(0,100,5)]+[i for i in np.arange(300,400,5)]
+    Y= [i for i in np.arange(50,150,5)]+[i for i in np.arange(200,300,5)]
+    
     bgs = glob.glob(bg_dir + "/*.jpg")
     for lab in labels:
         cls_num = cls_dict[lab]
         signs = glob.glob(sign_dir + "/" + lab + "/*")
         for si in signs:
+            # Random choose image position
+            x = random.choice(X)
+            y = random.choice(Y)
+            
             im2 = Image.open(si)
             im2.thumbnail((resize_w,resize_h), Image.ANTIALIAS)
             abs_width,abs_height = im2.size
@@ -45,7 +53,7 @@ labels = [f for f in os.listdir(sign_path) if not f.startswith('.')]
 print(labels)
 
 # 20,200 is the left top coord of the sign in the street image
-paste(bg_path,sign_path,labels,20,200)
+paste(bg_path,sign_path,labels)
 
 
 
