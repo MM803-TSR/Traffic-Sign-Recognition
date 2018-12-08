@@ -4,7 +4,8 @@ from matplotlib import pyplot as plt
 import os
 import sys
 import glob
-
+import random
+import numpy as np
 
 def paste(bg_dir, sign_dir, labels):
     global num , _size
