@@ -852,3 +852,6 @@ print('finish all frames!')
 # len should = # of frames
 print("length of output_labeled_img_list", len(output_labeled_img_list))
 
+cropped_img_input_list = output_red_list+output_yellow_orange_list+output_white_list
+
+
