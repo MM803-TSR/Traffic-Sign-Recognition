@@ -191,7 +191,7 @@ def AbsNorm(image, a=-.5, b=0.5, col_min=0, col_max=255):
 	return (image-col_min)*(b-a)/(col_max-col_min)
 
 
-def contrast_norm(image) :
+def contrast_norm(image):
 	# convert to  lab colorspace
 	lab= cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
 	# apply adative histogram equalization

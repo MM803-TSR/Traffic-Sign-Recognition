@@ -23,6 +23,12 @@ def get_red_mask(img, lower_color1, upper_color1, lower_color2, upper_color2):
     return red_mask
 
 
+def get_yellow_mask(img, lower_color, upper_color):
+    masked_img = cv2.inRange(img, lower_color, upper_color)
+    yellow_mask = masked_img
+    return yellow_mask
+
+
 def dilate_erode(img, kernel_size):
     kernel = np.ones((kernel_size, kernel_size), np.uint8)
     dilated_img = cv2.dilate(img, kernel, iterations=1)
@@ -153,6 +159,8 @@ final_mask = cv2.bitwise_and(stop_cleaned_img_1, stop_cleaned_img_2)
 plt.imshow(final_mask, cmap='gray')
 plt.show()
 
+
+
 # Draw contour before fixing convex defect
 draw_contour(final_mask, blank_canvas_1, 2)
 plt.imshow(blank_canvas_1)
@@ -180,18 +188,18 @@ similarity_level_fix = shape_compare(largest_fix_octagon_cnt, octagon_template_c
 print(similarity_level_fix)
 
 # Check if any of the 2 values is lower than a threshold? If so, draw bounding box on this contour region.
-
-# Draw/ expand the bounding box and crop it.
-border = 5
-target_region_pos, box_on_img = draw_box(final_mask, stop_rgb_img, 3)
-for r in target_region_pos:
-    before_eq, after_eq = crop_and_hist(stop_rgb_img, r, border)
-    plt.imshow(before_eq)
+if similarity_level_fix < 0.1 or similarity_level_ori < 0.1:
+    target_region_pos, box_on_img = draw_box(final_mask, stop_rgb_img, 1)
+    print(target_region_pos)
+    plt.imshow(box_on_img)
     plt.show()
-    # show_hist(before_eq)
-    # #plt.show()
-    # plt.imshow(after_eq)
-    # plt.show()
-    # show_hist(after_eq)
-    # plt.show()
+    # Draw/ expand the bounding box and crop it.、
 
+    border = 5
+    for r in target_region_pos:
+        before_eq, after_eq = crop_and_hist(stop_rgb_img, r, border)
+        plt.imshow(before_eq)
+        plt.show()
+else:
+    plt.imshow(stop_rgb_img)
+    plt.show()
