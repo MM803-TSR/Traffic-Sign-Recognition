@@ -4,6 +4,27 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from preprocessing.predict import predict
 
+sign_dict = {
+1: "Stop Ahead",
+2:	"Maximum 80",
+3:	"Maximum 40",
+4:	"Yield Sign",
+5:	"Maximum 50",
+6:	'Right Curve Sign',
+7:	'Left Curve Sign',
+8:	'Maximum 60 ahead',
+9:	'Construction ahead',
+10:	'Stop Sign',
+11:	'Maximum 30',
+12:	'Maximum 30',
+13:	'Yield Ahead Sign',
+14:	'Signal Ahead Sign',
+15:	'Maximum 50 ahead',
+16:	'Maximum 60',
+17:	'Maximum 70',
+18:	'Guide Sign'
+}
+
 def video_to_frames(vedio_path):
 	vidcap = cv2.VideoCapture(vedio_path)
 	success, image = vidcap.read()
@@ -22,6 +43,43 @@ def video_to_frames(vedio_path):
 	print("length of img_set", len(img_set))
 	return img_set
 
+def video_to_stream(video_path):
+	out = cv2.VideoWriter('sample_images/test_video.mov', cv2.VideoWriter_fourcc(
+		'm', 'p', '4', 'v'), 1, (640, 360))
+
+	cap = cv2.VideoCapture(video_path)
+	frame_i = 0
+	classes = None
+	while (cap.isOpened()):
+		# Read the frame
+		ret, frame = cap.read()
+
+		#color_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+		if not frame_i % 3:
+			classes = process_frame(frame)
+		if classes:
+			for pos, pred in classes:
+				if int(pred) > 18:
+					continue
+				x, y, w, h = pos[0]
+				color, contour_thickness = (0, 255, 0), 2
+				frame = np.asarray(frame)
+				cv2.rectangle(frame, (x, y), (x + w, y + h), color, contour_thickness)
+				frame = Image.fromarray(frame)
+				draw = ImageDraw.Draw(frame)
+				draw.text((x, y), str(sign_dict[int(pred)]), fill=color)
+				frame = np.asarray(frame)
+		cv2.imshow('frame', frame)
+		output_rgb = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+		out.write(output_rgb)
+		cv2.waitKey(33)
+		frame_i += 1
+		if cv2.waitKey(1) & 0xFF == ord('q'):
+			break
+	out.release()
+	cap.release()
+	cv2.destroyAllWindows()
 
 def frames_to_video(input_img_list, outputpath, fps):
 	image_array = []
@@ -216,6 +274,9 @@ def crop_possible_signs(similarity_level_ori, similarity_level_fix, final_mask, 
 		#print(target_region_pos)
 		#         plt.imshow(box_on_img)
 		#         plt.show()
+		x, y, w, h = target_region_pos[0]
+		if w*h < 1000:
+			return None, None
 		border = 8
 		target_region_img_before_eq = crop_and_hist(rgb_img, target_region_pos, border)
 		output = target_region_img_before_eq
@@ -269,19 +330,21 @@ gray_dimond_shape_template, dimond_shape_template_cnt = load_template(dimond_sha
 
 # Read image(whatever color) as sample_img and display it.
 video_path = '../sample_images/video_1.mov'
-input_frames_set = video_to_frames(video_path)
-print(len(input_frames_set))
-frame_i = 0
+# input_frames_set = video_to_frames(video_path)
+# print(len(input_frames_set))
+# frame_i = 0
+
 processed_frames = []
 
-for frame in input_frames_set[:len(input_frames_set) - 1]:
+#for frame in input_frames_set[:len(input_frames_set) - 1]:
+def process_frame(frame):
 	output_labeled_img_list = []
 	output_red_list = []
 	output_yellow_orange_list = []
 	output_white_list = []
 	output_green_list = []
 
-	print("start processing frame:", frame_i)
+	#print("start processing frame:", frame_i)
 	blank_canvas_red, blank_canvas_yellow_orange, blank_canvas_white, sample_img, rgb_img, hsv_img, blur_img = load_prep_img(
 		frame)
 	w = sample_img.shape[0]
@@ -465,50 +528,42 @@ for frame in input_frames_set[:len(input_frames_set) - 1]:
 					#plt.show()
 					output_white_list.append((pos, output_white))
 		#                 Image.fromarray(output_white).save('sample_images/cropped_video_4/output_output_white_%d_%d.jpg'%(frame_i,c))
-		else:
-			continue
-	frame_i += 1
+		#else:
+			#continue
+	#frame_i += 1
 
 	# print(len(output_red_list))
 	# print(len(output_yellow_orange_list))
 	# print(len(output_green_list))
 	# print(len(output_white_list))
 
-	data_dir = "D:\Yanxi\MMGRAD\MM803\Project/new dataset1/train_negative/"
+	#data_dir = "D:\Yanxi\MMGRAD\MM803\Project/new dataset1/train_negative/"
 
 	cropped_img_input_list = output_red_list + output_yellow_orange_list + output_green_list + output_white_list
 	if not cropped_img_input_list:
 		pass
-	file_i = 0
+	#file_i = 0
 	classes = []
 	for pos, img in cropped_img_input_list:
 		pred, prob, prob_std = predict(img)
 		if prob_std < 0.1 or prob < 0.7:
 			#classes.append((None, None))
-			cv2.imwrite(filename=data_dir + 'missed' + '/' + str(video_path.split('/')[-1]) + str(frame_i) + '_' + str(
-				file_i) + '.jpg', img=img)
+			#cv2.imwrite(filename=data_dir + 'missed' + '/' + str(video_path.split('/')[-1]) + str(frame_i) + '_' + str(
+				#file_i) + '.jpg', img=img)
 			continue
 		#cv2.imwrite(filename=data_dir+str(pred)+'/'+str(video_path.split('/')[-1])+str(frame_i)+'_'+str(file_i)+'.jpg', img=img)
 		classes.append((pos, pred))
-	# fig, axes = plt.subplots(3, 3, figsize=(3, 3))
-	# i = 0
-	# for ax in axes.flatten():
-	# 	ax.imshow(cropped_img_input_list[i][1])
-	# 	if i >= len(cropped_img_input_list) - 1:
-	# 		break
-	# 	i += 1
-	# fig.show()
-	#print(classes)
-
-	for pos, pred in classes:
-		x, y, w, h = pos[0]
-		color, contour_thickness = (0, 255, 0), 3
-		rgb_img = np.asarray(rgb_img)
-		cv2.rectangle(rgb_img, (x, y), (x + w, y + h), color, contour_thickness)
-		rgb_img = Image.fromarray(rgb_img)
-		draw = ImageDraw.Draw(rgb_img)
-		draw.text((x, y), str(pred), fill=color)
+	return classes
+	# for pos, pred in classes:
+	# 	x, y, w, h = pos[0]
+	# 	color, contour_thickness = (0, 255, 0), 3
+	# 	rgb_img = np.asarray(rgb_img)
+	# 	cv2.rectangle(rgb_img, (x, y), (x + w, y + h), color, contour_thickness)
+	# 	rgb_img = Image.fromarray(rgb_img)
+	# 	draw = ImageDraw.Draw(rgb_img)
+	# 	draw.text((x, y), str(pred), fill=color)
 	#processed_frames.append(np.asarray(rgb_img))
+	#return np.asarray(rgb_img)
 
 print('finish all frames!')
 #for f in processed_frames:
@@ -540,3 +595,6 @@ print('finish all frames!')
 # 		Image.fromarray(crop_white_img).save('sample_images/cropped_video_8/output_output_white_%d.jpg' % d)
 # 		d += 1
 
+video_path = '../sample_images/video_test_1.mov'
+stream = 0
+video_to_stream(stream)
