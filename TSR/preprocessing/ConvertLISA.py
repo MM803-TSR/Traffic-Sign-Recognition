@@ -57,10 +57,10 @@ def convert(filenames, annotations, type):
 		print('Generating '+type+str(i))
 
 
-train_img, train_annot = parse_csv(basedir+'\split1.csv')
-convert(train_img, train_annot, 'Train')
-test_img, test_annot = parse_csv(basedir+'\split2.csv')
-convert(test_img, test_annot, 'Test')
+#train_img, train_annot = parse_csv(basedir+'\split1.csv')
+#convert(train_img, train_annot, 'Train')
+#test_img, test_annot = parse_csv(basedir+'\split2.csv')
+#convert(test_img, test_annot, 'Test')
 
 # --------------------------Extract for CNN-------------------------------
 

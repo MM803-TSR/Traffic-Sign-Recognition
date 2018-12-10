@@ -195,7 +195,7 @@ def contrast_norm(image) :
 	# convert to  lab colorspace
 	lab= cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
 	# apply adative histogram equalization
-	l = lab[:,:,0]
+	l = lab[:,:,0].astype(np.uint8)
 	clahe = cv2.createCLAHE(clipLimit=5.0, tileGridSize=(4,4))
 	cl = clahe.apply(l)
 	lab[:,:,0] = cl
@@ -256,16 +256,15 @@ config.gpu_options.allow_growth = True
 
 with tf.Session(config=config) as sess:
 	sess.run(tf.global_variables_initializer())
-	num_examples = len(y_train_test)
+	num_examples = len(y_train)
 	print("Training...")
 	print()
 	for i in range(EPOCHS):
-		X_train, y_train = shuffle(X_train_test, y_train_test)
+		X_train, y_train = shuffle(X_train, y_train)
 		for offset in range(0, num_examples, BATCH_SIZE):
 			end = offset + BATCH_SIZE
 			batch_x, batch_y = X_train[offset:end], y_train[offset:end]
-			_, loss_val = sess.run([model_1.train_step, model_1.training_operation], feed_dict={x: batch_x, y: batch_y, keep_prob: 0.5, keep_prob_conv: 0.7})
-			print('loss = ' + loss_val)
+			sess.run(model_1.training_operation, feed_dict={x: batch_x, y: batch_y, keep_prob: 0.5, keep_prob_conv: 0.7})
 		#validation_accuracy = model_1.evaluate(X_validation, y_validation)
 		#print("EPOCH {} : Validation Accuracy = {:.3f}".format(i+1, validation_accuracy))
 		print("EPOCH {}".format(i + 1))

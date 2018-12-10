@@ -15,6 +15,7 @@ from keras.utils import np_utils
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint
 from keras import backend as K
 from keras.models import load_model
+from keras.models import model_from_json
 K.set_image_data_format('channels_first')
 
 from matplotlib import pyplot as plt
@@ -192,7 +193,7 @@ def cnn_model1():
 	model.add(Flatten())
 	model.add(Dense(256, activation='relu'))
 	model.add(Dropout(0.5))
-	model.add(Dense(19, activation='sigmoid'))
+	model.add(Dense(19, activation='softmax'))
 	return model
 
 model = cnn_model1()
@@ -214,7 +215,7 @@ nb_epoch = 10
 
 X_train_new, y_train = shuffle(X_train_new, y_train)
 
-#model = load_model('model1.h5')
+model = load_model('model2.h5')
 model.fit(np.asarray(X_train_new), y_train,
 		  batch_size=batch_size,
 		  epochs=nb_epoch,
@@ -223,10 +224,9 @@ model.fit(np.asarray(X_train_new), y_train,
 		  callbacks=[LearningRateScheduler(lr_schedule),
 					ModelCheckpoint('model1.h5',save_best_only=True)]
 			)
-model.save('model1.h5')
+model.save('model2.h5')
 
-y_pred = model.predict_classes(np.asarray(X_test_new))
-y_pred = y_pred.tolist()
+y_pred = model.predict(np.asarray(X_test_new), verbose=1)
 print(y_test)
 print(y_pred)
 score = [int(y_test[i]) == int(y_pred[i]) for i in range(len(y_test))]
@@ -234,3 +234,12 @@ print(score)
 acc = sum(int(y_test[i]) == int(y_pred[i]) for i in range(len(y_test)))/len(y_test)
 
 print("Test accuracy = {}".format(acc))
+
+
+## save model to json and h5
+model_json = model.to_json()
+
+with open("model_num.json", "w") as json_file:
+    json_file.write(model_json)
+
+model.save_weights("model_num.h5")

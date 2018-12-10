@@ -2,7 +2,8 @@ import os, sys, csv
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-
+import pickle
+from PIL import Image
 
 # geometric transformations
 
@@ -70,10 +71,14 @@ def transform_img(imdir, imname):
 		print(image.shape)
 		transforms.append(scale(image, 1, 1.5))
 		transforms.append(scale(image, 1.5, 1))
+		transforms.append(rotate(img, 18))
+		transforms.append(rotate(img, -18))
 		transforms.append(translate(image, int(r*0.1), int(-r*0.1)))
 		transforms.append(translate(image, int(-r*0.1), int(r*0.1)))
 		for im in warp(image):
-			transforms.append(im)
+			h, w = im.shape[:-1]
+			dr, dc = int(h*0.1), int(w*0.1)
+			transforms.append(im[dc:w-dc, dr:h-dr])
 
 	helper(img)
 
@@ -88,4 +93,43 @@ def transform_img(imdir, imname):
 	for i, image in enumerate(transforms):
 		cv2.imwrite(imdir+str(i)+imname, image)
 
+
+
+# names = os.listdir(directory)
+# for name in names:
+# 	transform_img(directory, name)
+
+directory = 'D:/Yanxi/MMGRAD/MM803/Project/new dataset1/train/'
+categories = os.listdir(directory)
+X, y = [], []
+for subfolder in categories:
+	subdir = directory+subfolder
+	imnames = os.listdir(subdir)
+	# for imname in imnames:
+	# 	if 'png' in imname.split('.'):
+	# 		im = Image.open(subdir+'/'+imname)
+	# 		rgb_im = im.convert('RGB')
+	# 		rgb_im.save(subdir+'/'+imname+'.jpg')
+
+	for imname in imnames:
+		imdir = subdir+'/'+imname
+		im = cv2.imread(imdir)
+		out = cv2.resize(im, (32, 32))
+		X.append(np.asarray(out))
+
+		# # for training
+		# y_row = np.eye(4, dtype='uint8')[int(subfolder)]
+		# y.append(y_row)
+
+		# for testing
+		y.append(np.asarray(int(subfolder)))
+
+
+print(np.asarray(X).shape, len(y))
+
+with open(directory + 'X_train.p', 'wb') as f:
+		pickle.dump(np.array(X), f)
+
+with open(directory + 'y_train.p', 'wb') as f:
+		pickle.dump(np.array(y), f)
 
