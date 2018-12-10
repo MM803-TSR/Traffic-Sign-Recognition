@@ -213,7 +213,7 @@ def crop_and_hist(original_img, target_region_pos, border):
 def crop_possible_signs(similarity_level_ori, similarity_level_fix, final_mask, rgb_img):
 	if similarity_level_ori < 0.8 or similarity_level_fix < 0.8:
 		target_region_pos, box_on_img = draw_box(final_mask, rgb_img, 1)
-		print(target_region_pos)
+		#print(target_region_pos)
 		#         plt.imshow(box_on_img)
 		#         plt.show()
 		border = 8
@@ -268,7 +268,7 @@ gray_dimond_shape_template, dimond_shape_template_cnt = load_template(dimond_sha
 
 
 # Read image(whatever color) as sample_img and display it.
-video_path = '../sample_images/video_test_1.mov'
+video_path = '../sample_images/video_1.mov'
 input_frames_set = video_to_frames(video_path)
 print(len(input_frames_set))
 frame_i = 0
@@ -364,8 +364,8 @@ for frame in input_frames_set[:len(input_frames_set) - 1]:
 		# Crop out red signs from ori_img:
 		pos, output_red = crop_possible_signs(similarity_level_ori_red, similarity_level_fix_red, final_red_mask, rgb_img)
 		if output_red is not None:
-			plt.imshow(output_red)
-			plt.show()
+			#plt.imshow(output_red)
+			#plt.show()
 			output_red_list.append((pos, output_red))
 	#         Image.fromarray(output_red).save('sample_images/cropped_video_4/output_output_red_%d_%d.jpg'%(frame_i,a)
 
@@ -396,8 +396,8 @@ for frame in input_frames_set[:len(input_frames_set) - 1]:
 		                                           similarity_level_fix_yellow_orange, final_yellow_orange_mask,
 		                                           rgb_img)
 		if output_yellow_orange is not None:
-			plt.imshow(output_yellow_orange)
-			plt.show()
+			#plt.imshow(output_yellow_orange)
+			#plt.show()
 			output_yellow_orange_list.append((pos, output_yellow_orange))
 
 	# Green:
@@ -418,8 +418,8 @@ for frame in input_frames_set[:len(input_frames_set) - 1]:
 		pos, output_green = crop_possible_signs(similarity_level_ori_green, similarity_level_fix_green, final_green_mask,
 		                                   rgb_img)
 		if output_green is not None:
-			plt.imshow(output_green)
-			plt.show()
+			#plt.imshow(output_green)
+			#plt.show()
 			output_green_list.append((pos, output_green))
 
 	# Draw contours on white_canvas before fixing convex defects.
@@ -453,26 +453,26 @@ for frame in input_frames_set[:len(input_frames_set) - 1]:
 				pos, output_white = crop_possible_signs(similarity_level_ori_white, similarity_level_fix_white,
 				                                   final_white_mask1, rgb_img)
 				if output_white is not None:
-					plt.imshow(output_white)
-					plt.show()
+					#plt.imshow(output_white)
+					#plt.show()
 					output_white_list.append((pos, output_white))
 			#                 Image.fromarray(output_white).save('sample_images/cropped_video_4/output_output_white_%d_%d.jpg'%(frame_i,c))
 			else:
 				pos, output_white = crop_possible_signs(similarity_level_ori_white, similarity_level_fix_white2,
 				                                   final_white_mask2, rgb_img)
 				if output_white is not None:
-					plt.imshow(output_white)
-					plt.show()
+					#plt.imshow(output_white)
+					#plt.show()
 					output_white_list.append((pos, output_white))
 		#                 Image.fromarray(output_white).save('sample_images/cropped_video_4/output_output_white_%d_%d.jpg'%(frame_i,c))
 		else:
 			continue
 	frame_i += 1
 
-	print(len(output_red_list))
-	print(len(output_yellow_orange_list))
-	print(len(output_green_list))
-	print(len(output_white_list))
+	# print(len(output_red_list))
+	# print(len(output_yellow_orange_list))
+	# print(len(output_green_list))
+	# print(len(output_white_list))
 
 	data_dir = "D:\Yanxi\MMGRAD\MM803\Project/new dataset1/train_negative/"
 
@@ -485,18 +485,20 @@ for frame in input_frames_set[:len(input_frames_set) - 1]:
 		pred, prob, prob_std = predict(img)
 		if prob_std < 0.1 or prob < 0.7:
 			#classes.append((None, None))
+			cv2.imwrite(filename=data_dir + 'missed' + '/' + str(video_path.split('/')[-1]) + str(frame_i) + '_' + str(
+				file_i) + '.jpg', img=img)
 			continue
-		cv2.imwrite(filename=data_dir+str(pred)+'/'+str(video_path.split('/')[-1])+str(frame_i)+'_'+str(file_i)+'.jpg', img=img)
+		#cv2.imwrite(filename=data_dir+str(pred)+'/'+str(video_path.split('/')[-1])+str(frame_i)+'_'+str(file_i)+'.jpg', img=img)
 		classes.append((pos, pred))
-	fig, axes = plt.subplots(3, 3, figsize=(3, 3))
-	i = 0
-	for ax in axes.flatten():
-		ax.imshow(cropped_img_input_list[i][1])
-		if i >= len(cropped_img_input_list) - 1:
-			break
-		i += 1
-	fig.show()
-	print(classes)
+	# fig, axes = plt.subplots(3, 3, figsize=(3, 3))
+	# i = 0
+	# for ax in axes.flatten():
+	# 	ax.imshow(cropped_img_input_list[i][1])
+	# 	if i >= len(cropped_img_input_list) - 1:
+	# 		break
+	# 	i += 1
+	# fig.show()
+	#print(classes)
 
 	for pos, pred in classes:
 		x, y, w, h = pos[0]
@@ -506,12 +508,12 @@ for frame in input_frames_set[:len(input_frames_set) - 1]:
 		rgb_img = Image.fromarray(rgb_img)
 		draw = ImageDraw.Draw(rgb_img)
 		draw.text((x, y), str(pred), fill=color)
-	processed_frames.append(np.asarray(rgb_img))
+	#processed_frames.append(np.asarray(rgb_img))
 
 print('finish all frames!')
-for f in processed_frames:
-	plt.imshow(f)
-	plt.show()
+#for f in processed_frames:
+	#plt.imshow(f)
+	#plt.show()
 
 
 # if len(output_red_list) != 0:
