@@ -23,21 +23,21 @@ def contrast_norm(image):
 
 
 def predict(img):
-	img = cv2.imread(img)
+	#img = cv2.imread(img)
 	img = contrast_norm(img)
 	out = model.predict(img)
 	pred = np.argmax(out)
 	prob = out[0][np.argmax(out)]
+	prob_std = np.std(out)
 	print(out)
 	print('std = ' + str(np.std(out)))
-	return pred, prob
+	return pred, prob, prob_std
 
 
 PROB_THRESH = 0.7  # classified sign vs else
 STD_THRESH = 0.1  # non-sign vs non-classified sign
 
-impath = '../Real_Images/stop.jpg'
-print(predict(impath))
+
 
 ### Non-classified sign
 # [[6.1113016e-05 4.5888345e-03 6.8805598e-02 4.4876698e-01 1.7901228e-03
