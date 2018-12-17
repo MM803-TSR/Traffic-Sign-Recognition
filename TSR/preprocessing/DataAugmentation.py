@@ -94,7 +94,7 @@ def transform_img(imdir, imname):
 		cv2.imwrite(imdir+str(i)+imname, image)
 
 
-
+# directory = 'D:/Yanxi/MMGRAD/MM803/Project/new dataset1/train/27/'
 # names = os.listdir(directory)
 # for name in names:
 # 	transform_img(directory, name)
@@ -113,6 +113,7 @@ for subfolder in categories:
 
 	for imname in imnames:
 		imdir = subdir+'/'+imname
+		print(imdir)
 		im = cv2.imread(imdir)
 		out = cv2.resize(im, (32, 32))
 		X.append(np.asarray(out))

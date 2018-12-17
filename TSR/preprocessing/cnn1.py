@@ -66,7 +66,7 @@ print(X_train[10])
 y_train = []
 
 for i, y in enumerate(y_temp):
-	y_row = np.eye(19, dtype='uint8')[int(y)]
+	y_row = np.eye(37, dtype='uint8')[int(y)]
 	y_train.append(y_row)
 
 y_train = np.asarray(y_train)
@@ -165,7 +165,7 @@ def cnn_model():
 	model.add(Flatten())
 	model.add(Dense(512, activation='relu'))
 	model.add(Dropout(0.5))
-	model.add(Dense(19, activation='softmax'))
+	model.add(Dense(37, activation='softmax'))
 	return model
 
 def cnn_model1():
@@ -184,16 +184,16 @@ def cnn_model1():
 	model.add(MaxPooling2D(pool_size=(2, 2)))
 	model.add(Dropout(0.2))
 
-	# model.add(Conv2D(128, (3, 3), padding='same',
-	# 				 activation='relu'))
-	# model.add(Conv2D(128, (3, 3), activation='relu'))
-	# model.add(MaxPooling2D(pool_size=(2, 2)))
-	# model.add(Dropout(0.2))
+	model.add(Conv2D(128, (3, 3), padding='same',
+					 activation='relu'))
+	model.add(Conv2D(128, (3, 3), activation='relu'))
+	model.add(MaxPooling2D(pool_size=(2, 2)))
+	model.add(Dropout(0.2))
 
 	model.add(Flatten())
-	model.add(Dense(256, activation='relu'))
+	model.add(Dense(512, activation='relu'))
 	model.add(Dropout(0.5))
-	model.add(Dense(19, activation='softmax'))
+	model.add(Dense(37, activation='softmax'))
 	return model
 
 model = cnn_model1()
@@ -210,36 +210,39 @@ def lr_schedule(epoch):
 	return lr1*(0.1**int(epoch/10))
 
 batch_size = 32
-nb_epoch = 10
+nb_epoch = 100
 
 
 X_train_new, y_train = shuffle(X_train_new, y_train)
 
-model = load_model('model2.h5')
+model = load_model('final_model1.h5')
 model.fit(np.asarray(X_train_new), y_train,
 		  batch_size=batch_size,
 		  epochs=nb_epoch,
 		  validation_split=0.2,
 		  shuffle=True,
 		  callbacks=[LearningRateScheduler(lr_schedule),
-					ModelCheckpoint('model1.h5',save_best_only=True)]
+					ModelCheckpoint('final_model1.h5',save_best_only=True)]
 			)
-model.save('model2.h5')
+model.save('final_model1.h5')
 
 y_pred = model.predict(np.asarray(X_test_new), verbose=1)
+y_pred_class = []
+for i in y_pred:
+	y_pred_class.append(np.argmax(i))
 print(y_test)
-print(y_pred)
-score = [int(y_test[i]) == int(y_pred[i]) for i in range(len(y_test))]
-print(score)
-acc = sum(int(y_test[i]) == int(y_pred[i]) for i in range(len(y_test)))/len(y_test)
+print(y_pred_class)
+#score = [int(y_test[i]) == int(y_pred[i]) for i in range(len(y_test))]
+#print(score)
+#acc = sum(int(y_test[i]) == int(y_pred[i]) for i in range(len(y_test)))/len(y_test)
 
-print("Test accuracy = {}".format(acc))
+#print("Test accuracy = {}".format(acc))
 
 
 ## save model to json and h5
 model_json = model.to_json()
 
-with open("model_num.json", "w") as json_file:
+with open("final_model1_read.json", "w") as json_file:
     json_file.write(model_json)
 
-model.save_weights("model_num.h5")
+model.save_weights("final_model1_read.h5")

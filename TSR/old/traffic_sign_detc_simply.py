@@ -338,6 +338,7 @@ processed_frames = []
 
 #for frame in input_frames_set[:len(input_frames_set) - 1]:
 def process_frame(frame):
+	r, c = frame.shape[:-1]
 	output_labeled_img_list = []
 	output_red_list = []
 	output_yellow_orange_list = []
@@ -485,52 +486,74 @@ def process_frame(frame):
 			#plt.show()
 			output_green_list.append((pos, output_green))
 
-	# Draw contours on white_canvas before fixing convex defects.
-	_, all_sorted_cnt_white = find_contour(final_white_mask1)
-	largest_fix_white_cnt2, all_sorted_cnt_white2 = find_contour(final_white_mask2)
-	if all_sorted_cnt_white or all_sorted_cnt_white2 is not None:
-		draw_contour_2(final_white_mask1, blank_canvas_white, 2)
-		largest_ori_white_cnt, _ = find_contour(final_white_mask1)
-		similarity_level_ori_white = shape_compare(largest_ori_white_cnt, rectangle_template_cnt)
-		#         plt.imshow(blank_canvas_white)
-		#         plt.show()
-		print(similarity_level_ori_white)
 
-		# Fix convexity defect on white canvas & Re-draw contour after fixing convex defect
-		convex_fixed_white_img = fix_convex_defect(final_white_mask1)
-		blank_canvas_white_2 = np.zeros(sample_img.shape, dtype=np.uint8)
-		draw_contour_2(convex_fixed_white_img, blank_canvas_white_2, 2)
-		#         plt.imshow(blank_canvas_white_2)
-		#         plt.show()
+	# White:
+	kernel = np.ones((3, 3), np.uint8)
+	erosion = cv2.erode(frame, kernel, iterations=1)
+	dilation = cv2.dilate(erosion, kernel, iterations=1)
+	erosion = cv2.erode(dilation, kernel, iterations=1)
+	retval, threshold = cv2.threshold(erosion, 120, 240, cv2.THRESH_BINARY)
+	# cv2.imshow('img', threshold)
+	# cv2.waitKey(0)
 
-		# Within white canvas, make comparison with the templet
-		largest_fix_white_cnt, _ = find_contour(convex_fixed_white_img)
-		largest_fix_white_cnt2, _ = find_contour(final_white_mask2)
-		similarity_level_fix_white = shape_compare(largest_fix_white_cnt, rectangle_template_cnt)
-		similarity_level_fix_white2 = shape_compare(largest_fix_white_cnt2, rectangle_template_cnt)
+	threshold = cv2.cvtColor(threshold, cv2.COLOR_BGR2GRAY)
+	_, cnts, _ = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+	# cv2.drawContours(threshold, cnts, -1, (0,255,0), 3)
+	# cv2.imshow('img', threshold)
+	# cv2.waitKey(0)
+	cnts = sorted(cnts, key=cv2.contourArea)[::-1]
+	for cnt in cnts:
+		x, y, w, h = cv2.boundingRect(cnt)
+		if w * h < r * c * 0.0007 or w * h > r * c * 0.1 or w > h or w < h * 0.35:
+			continue
+		output_white_list.append(([[x, y, w, h]], frame[y:y + h, x:x + w]))
 
-		if cv2.contourArea(largest_fix_white_cnt) < (w * h) * 0.05 and cv2.contourArea(largest_fix_white_cnt2) < (
-				w * h) * 0.05:
-			# Crop out white signs from ori_img according to white canvas:
-			if similarity_level_fix_white < similarity_level_fix_white2:
-				pos, output_white = crop_possible_signs(similarity_level_ori_white, similarity_level_fix_white,
-				                                   final_white_mask1, rgb_img)
-				if output_white is not None:
-					#plt.imshow(output_white)
-					#plt.show()
-					output_white_list.append((pos, output_white))
-			#                 Image.fromarray(output_white).save('sample_images/cropped_video_4/output_output_white_%d_%d.jpg'%(frame_i,c))
-			else:
-				pos, output_white = crop_possible_signs(similarity_level_ori_white, similarity_level_fix_white2,
-				                                   final_white_mask2, rgb_img)
-				if output_white is not None:
-					#plt.imshow(output_white)
-					#plt.show()
-					output_white_list.append((pos, output_white))
-		#                 Image.fromarray(output_white).save('sample_images/cropped_video_4/output_output_white_%d_%d.jpg'%(frame_i,c))
-		#else:
-			#continue
-	#frame_i += 1
+	# # Draw contours on white_canvas before fixing convex defects.
+	# _, all_sorted_cnt_white = find_contour(final_white_mask1)
+	# largest_fix_white_cnt2, all_sorted_cnt_white2 = find_contour(final_white_mask2)
+	# if all_sorted_cnt_white or all_sorted_cnt_white2 is not None:
+	# 	draw_contour_2(final_white_mask1, blank_canvas_white, 2)
+	# 	largest_ori_white_cnt, _ = find_contour(final_white_mask1)
+	# 	similarity_level_ori_white = shape_compare(largest_ori_white_cnt, rectangle_template_cnt)
+	# 	#         plt.imshow(blank_canvas_white)
+	# 	#         plt.show()
+	# 	print(similarity_level_ori_white)
+	#
+	# 	# Fix convexity defect on white canvas & Re-draw contour after fixing convex defect
+	# 	convex_fixed_white_img = fix_convex_defect(final_white_mask1)
+	# 	blank_canvas_white_2 = np.zeros(sample_img.shape, dtype=np.uint8)
+	# 	draw_contour_2(convex_fixed_white_img, blank_canvas_white_2, 2)
+	# 	#         plt.imshow(blank_canvas_white_2)
+	# 	#         plt.show()
+	#
+	# 	# Within white canvas, make comparison with the templet
+	# 	largest_fix_white_cnt, _ = find_contour(convex_fixed_white_img)
+	# 	largest_fix_white_cnt2, _ = find_contour(final_white_mask2)
+	# 	similarity_level_fix_white = shape_compare(largest_fix_white_cnt, rectangle_template_cnt)
+	# 	similarity_level_fix_white2 = shape_compare(largest_fix_white_cnt2, rectangle_template_cnt)
+	#
+	# 	if cv2.contourArea(largest_fix_white_cnt) < (w * h) * 0.05 and cv2.contourArea(largest_fix_white_cnt2) < (
+	# 			w * h) * 0.05:
+	# 		# Crop out white signs from ori_img according to white canvas:
+	# 		if similarity_level_fix_white < similarity_level_fix_white2:
+	# 			pos, output_white = crop_possible_signs(similarity_level_ori_white, similarity_level_fix_white,
+	# 			                                   final_white_mask1, rgb_img)
+	# 			if output_white is not None:
+	# 				#plt.imshow(output_white)
+	# 				#plt.show()
+	# 				output_white_list.append((pos, output_white))
+	# 		#                 Image.fromarray(output_white).save('sample_images/cropped_video_4/output_output_white_%d_%d.jpg'%(frame_i,c))
+	# 		else:
+	# 			pos, output_white = crop_possible_signs(similarity_level_ori_white, similarity_level_fix_white2,
+	# 			                                   final_white_mask2, rgb_img)
+	# 			if output_white is not None:
+	# 				#plt.imshow(output_white)
+	# 				#plt.show()
+	# 				output_white_list.append((pos, output_white))
+	# 	#                 Image.fromarray(output_white).save('sample_images/cropped_video_4/output_output_white_%d_%d.jpg'%(frame_i,c))
+	# 	#else:
+	# 		#continue
+	# #frame_i += 1
 
 	# print(len(output_red_list))
 	# print(len(output_yellow_orange_list))

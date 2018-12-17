@@ -1,12 +1,17 @@
 from keras.models import model_from_json
 import cv2
 import numpy as np
+#import os
+# import pickle
+# from sklearn.utils import shuffle
+#import matplotlib.pyplot as plt
+# from sklearn.metrics import accuracy_score
 
-json_file = open("model_num.json", 'r')
+json_file = open("final_model1_read.json", 'r')
 loaded_model_json = json_file.read()
 json_file.close()
 model = model_from_json(loaded_model_json)
-model.load_weights("model_num.h5")
+model.load_weights("final_model1_read.h5")
 
 
 def contrast_norm(image):
@@ -29,13 +34,63 @@ def predict(img):
 	pred = np.argmax(out)
 	prob = out[0][np.argmax(out)]
 	prob_std = np.std(out)
-	print(out)
-	print('std = ' + str(np.std(out)))
+	# print(out)
+	# print('std = ' + str(np.std(out)))
 	return pred, prob, prob_std
 
 
 PROB_THRESH = 0.7  # classified sign vs else
 STD_THRESH = 0.1  # non-sign vs non-classified sign
+
+# data_dir = '../test_images/'
+# X, Y, Y_test = [], [], []
+# for cls in os.listdir(data_dir):
+# 	img_dir = data_dir+cls+'/'
+# 	for img_name in os.listdir(img_dir):
+# 		img = cv2.imread(img_dir+img_name)
+# 		img = img.astype(np.uint8)
+# 		for c in range(3):
+# 			img[:, :, c] = cv2.equalizeHist(img[:, :, c])
+# 		out = cv2.resize(img, (32, 32))
+# 		#out = np.moveaxis(out, 2, 0)
+# 		X.append(np.asarray(out))
+# 		y = np.eye(37, dtype='uint8')[int(cls)]
+# 		Y.append(y)
+# 		Y_test.append(int(cls))
+# #
+# # with open(data_dir + 'X_test.p', 'wb') as f:
+# # 		pickle.dump(np.array(X), f)
+# #
+# # with open(data_dir + 'y_test.p', 'wb') as f:
+# # 	pickle.dump(np.array(Y), f)
+#
+# X, Y, Y_test = shuffle(X, Y, Y_test, random_state=0)
+#
+# X = []
+# for imname in os.listdir(data_dir):
+# 	img = cv2.imread(data_dir+imname)
+# 	out = cv2.resize(img, (200, 100))
+# 	X.append(np.asarray(out))
+#
+#
+# fig = plt.figure(figsize=(150, 100))
+# for i in range(6):
+# 	img = X[i]
+# 	fig.add_subplot(2, 3, i+1)
+# 	plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+# plt.show()
+#
+# y_pred = [np.argmax(model.predict(np.asarray([np.moveaxis(img, 2, 0)]))) for img in X]
+# print(y_pred)
+# print(Y_test)
+# count, correct = 0, 0
+# for i in range(len(y_pred)):
+# 	if y_pred[i] == Y_test[i]:
+# 		correct += 1
+# 	count += 1
+# print(correct/count)
+# print(accuracy_score(y_pred, Y_test))
+
 
 
 
