@@ -583,4 +583,3 @@ video_to_stream(video_path)
 # for cnt in contours:
 # 	x, y, w, h = cv2.boundingRect(cnt)
 # 	cv2.imshow('cnt', test_img[y:y+h, x:x+w])
-# 	cv2.waitKey(0)
