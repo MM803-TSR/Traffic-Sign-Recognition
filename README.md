@@ -9,7 +9,7 @@ processing techniques and convolutional neural networks.
 - Yiting Dong
 
 ### Requirements
-1.To run the demo
+1. To run the demo
 
     python3.6
     tensorflow
